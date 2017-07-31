@@ -1,4 +1,4 @@
-function [syncZ,peakIx,cchZ] = SyncScore(t1,t2,bins)
+function [syncZ,cchZ,cchP,cch,bxc] = SyncScore(t1,t2,bins)
 
 % Computes a sync score for two spike trains (i.e.  the number of z-values
 % above the cross-correlogram when all fine temporal coordination
@@ -35,15 +35,12 @@ cch = xc*length(t1)*bins/1000;
 %compute expected cross-corr by smoothing initial cross-corr
 [~, pred, ~] = cch_conv(round(cch),window);
 
-   
-%Interval of confidence assuming a Poisson process
-confInt = poissinv(0.95,pred);
+%Z-scored cch
+cchZ = (cch-pred)./sqrt(pred);
 
-%Z-scored CCH
-cchZ = (cch-pred)./(confInt-pred);
+%P-valued cch
+cchP = 1-poisscdf(cch,pred);
+%cchP = -log(cchP);
 
 %look for peak value
-[syncZ,peakIx] = max(cchZ(bix));
-b = bxc(bix);
-peakIx = b(peakIx);
-
+syncZ = max(cchP(bix));

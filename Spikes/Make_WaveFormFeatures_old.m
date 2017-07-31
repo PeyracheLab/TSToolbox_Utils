@@ -73,11 +73,12 @@ else
         %Positive or negative spike?
         baseLine = mean(wu(1:7));
         [~,absPk] = max(abs(wu));
-        if wu(absPk) > baseLine
+        if wu(absPk) > baseLine || absPk>40
             fprintf('Positive spike, skipping\n')
             tr2pk       = NaN;
             spkWidth    = NaN;
             wave        = NaN;
+            halfPkW     = NaN;
         else
         
             % Trough is supposed to be sample #17, but we never know...
@@ -89,40 +90,73 @@ else
             maxPos = maxPos+minPos;
             p2v = t(maxPos)-t(minPos);
             
-            [wave,f] = cwt(wu,Fq,'VoicesPerOctave',48);
-            wave = wave(f>500 & f<3000,:);
-            f = f(f>500 & f<3000);
+            %[wave,f] = cwt(wu,Fq,'VoicesPerOctave',48);
+            %wave = wave(f>500 & f<3000,:);
+            %f = f(f>500 & f<3000);
 
             %Where is the max power?
-            [maxPow,maxF] = max(wave);
+            %[maxPow,maxF] = max(wave);
             %Which frequency does it correspond to?
-            [~,fIx] = max(maxPow);
-            maxF = maxF(fIx);
+            %[~,fIx] = max(maxPow);
+            
+            %maxF = maxF(fIx);
 
             %Spike width is the inverse of the peak frequency
-            spkW = 1000/f(maxF);
-
+            %spkW = 1000/f(maxF);
+            spkW = NaN;
+            
             %Half Peak Width
-            baseLine = mean(wu(end-10:end));
-            baseLine = 
-            ix1 = find(wu(minPos:maxPos)>=baseLine);
-            if isempty(ix1)
+            %wu = wu(:).*hanning(length(wu));
+            baseLine = mean(wu(end-5:end));
+            [maxVal,maxPos] = max(wu(minPos+1:minPos+l));
+            maxPos = maxPos+minPos-1;
+            %try
+            ix1 = minPos;
+            if maxVal<0
                 halfW = NaN;
             else
-                ix1 = minPos+ix1(end);
-                if maxPos ~= length(wu)
-                    ix2 = find(wu(maxPos:end)>=baseLine);
-                    ix2 = ix2(1)+maxPos;
-                else
-                    ix2 = length(wu);
+                
+                while wu(ix1)<maxVal/2 &ix1<length(wu)
+                    ix1=ix1+1;
                 end
+                ix1=ix1-1;
+                ix2 = LocalMinima(wu(ix1:end),5,baseLine);
+                
+                if isempty(ix2)
 
-                halfW = t(ix2)-t(ix1);
+                    ix2 = ix1+1;
+                    while wu(ix2)>maxVal/2 & ix2<length(wu)
+                        ix2=ix2+1;
+                    end
+                else
+                    ix2 = ix1+ix2(1)-1;
+                    halfVal = (wu(maxPos) + wu(ix2))/2;
+                    ix2 = ix1;
+                    while wu(ix2)>halfVal & ix2<length(wu)
+                        ix2=ix2+1;
+                    end
+                end
+                
+%                 if ix2 == length(wu)
+%                     halfW = NaN;
+%                 else
+                    halfW = t(ix2)-t(ix1);
+%                 end
             end
-            
-            spkWidth(end+1) =spkW;
-            tr2pk(end+1) = p2v;
-            halfPkW(end+1) = halfW;
+            %catch
+            %    
+             %   figure(1),clf
+             %   plot(wu)
+             %   keyboard
+            %end
+            if p2v<0.4 &  halfW>0.3
+                figure(1),clf
+                plot(w)
+                keyboard
+            end
+            spkWidth =spkW;
+            tr2pk = p2v;
+            halfPkW = halfW;
         end
        
 end
