@@ -30,7 +30,7 @@
 
 function Process_ConvertBasler2Pos_All(fbasename)
 
-try
+% try
     
     folders = dir([fbasename '-*']);
     nRec = length(folders);
@@ -76,8 +76,8 @@ try
     fbasename = fullfile(fbasename,fbasename);
     dlmwrite([fbasename '.pos'],posAll,'delimiter','\t','precision',9);
     
-catch
-   keyboard
-end
+% catch
+%    keyboard
+% end
 end
 

@@ -76,7 +76,7 @@ videoSize   = videoObj.info.VideoSize;
 width       = videoSize(1);
 height      = videoSize(2);
 threshF     = 0.3;    % minimum threshold on foreground pixel intensity
-keyboard
+
 % Initialize grid for locating centroid of LED
 [X,Y] = meshgrid(1:width,1:height);
 
@@ -194,7 +194,8 @@ while ~isDone(videoObj)
     if smoothVideo
         fr_col        = gaussFilt(fr_col,1);
     end
-    thresh        = max(percentile(fr_col(fr_col(:)<1),0.999),threshF);
+    sortVal    = sort(double(fr_col(fr_col(:)<1)),'ascend');
+    thresh        = max(sortVal(round(0.999*length(sortVal))),threshF);
     label         = logical(fr_col>thresh & inArea);
     mask(label)   = 1;
     mask(~label)  = 0;

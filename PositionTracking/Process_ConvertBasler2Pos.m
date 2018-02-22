@@ -45,7 +45,7 @@ for i = 1:2:length(varargin),
   end
 end
 
-try
+% try
     
     dat = LoadBinary(syncDatFile,'nchannels',syncNbCh,'channels',syncChan);
     t = (0:length(dat)-1)'/syncSampFq;
@@ -96,8 +96,8 @@ try
     
     dlmwrite([fbasename '.pos'],[timestamps newPos],'delimiter','\t','precision',9);
     
-catch
-   keyboard
-end
+% catch
+%    keyboard
+% end
 end
 
